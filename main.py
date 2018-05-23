@@ -28,3 +28,7 @@ fpgrowth.mineFPtree(myFPtree, myHeaderTab, n, set([]), freqItems)
 for x in freqItems:
     print x
 print time.time()-start, 'sec'
+
+suppData = fpgrowth.calSuppData(myHeaderTab, freqItems, len(parsedDat))
+for x,v in suppData.iteritems():
+    print x,v

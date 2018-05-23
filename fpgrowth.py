@@ -112,4 +112,20 @@ def createInitSet(dataSet):
 		    retDict[frozenset(trans)] = 1
     return retDict
 
-
+def calSuppData(headerTable, freqItemList, total):
+    suppData = {}
+    for Item in freqItemList:
+        # 找到最底下的结点
+        Item = sorted(Item, key=lambda x:headerTable[x][0])
+        base = findPrefixPath(Item[0], headerTable)
+        # 计算支持度
+        support = 0
+        for B in base:
+            if frozenset(Item[1:]).issubset(set(B)):
+                support += base[B]
+        # 对于根的儿子，没有条件模式基
+        if len(base)==0 and len(Item)==1:
+            support = headerTable[Item[0]][0]
+            
+        suppData[frozenset(Item)] = support/float(total)
+    return suppData
