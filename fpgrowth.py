@@ -129,3 +129,42 @@ def calSuppData(headerTable, freqItemList, total):
             
         suppData[frozenset(Item)] = support/float(total)
     return suppData
+
+def aprioriGen(Lk, k):
+    retList = []
+    lenLk = len(Lk)
+    for i in range(lenLk):
+        for j in range(i+1, lenLk):
+            L1 = list(Lk[i])[:k-2]; L2 = list(Lk[j])[:k-2]
+            L1.sort(); L2.sort()
+            if L1 == L2: 
+                retList.append(Lk[i] | Lk[j])
+    return retList
+
+def calcConf(freqSet, H, supportData, br1, minConf=0.7):
+    prunedH = []
+    for conseq in H:
+        conf = supportData[freqSet] / supportData[freqSet - conseq]
+        if conf >= minConf:
+            print "{0} --> {1} conf:{2}".format(freqSet - conseq, conseq, conf)
+            br1.append((freqSet - conseq, conseq, conf))
+            prunedH.append(conseq)
+    return prunedH
+
+def rulesFromConseq(freqSet, H, supportData, br1, minConf=0.7):
+    m = len(H[0])
+    if len(freqSet) > m+1:
+        Hmp1 = aprioriGen(H, m+1)
+        Hmp1 = calcConf(freqSet, Hmp1, supportData, br1, minConf)
+        if len(Hmp1)>1:
+            rulesFromConseq(freqSet, Hmp1, supportData, br1, minConf)
+
+def generateRules(freqItemList, supportData, minConf=0.7):
+    bigRuleList = []
+    for freqSet in freqItemList:
+        H1 = [frozenset([item]) for item in freqSet]
+        if len(freqSet)>1:
+            rulesFromConseq(freqSet, H1, supportData, bigRuleList, minConf)
+        else:
+            calcConf(freqSet, H1, supportData, bigRuleList, minConf)
+    return bigRuleList
